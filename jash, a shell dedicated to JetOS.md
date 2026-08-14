@@ -26,7 +26,8 @@
 </Project>
 ```
 ### Program.cs
-``` global using System.Diagnostics;
+```cs
+ global using System.Diagnostics;
 global using System.Text;
 global using System.Collections.Concurrent;
 global using System.Globalization;
