@@ -1,4 +1,6 @@
 # jetOS
+<img width="1541" height="955" alt="image" src="https://github.com/user-attachments/assets/4b6156ac-b13a-4575-8c2c-117a033c413d" />
+
 It’s jetOS!!!!!! It’s free!!! It’s open source!!!!!!!!!!!! It’s an OS!!!!!!!
 ### It’s just the OS, that’s all. 
 >**But I’ve been steadily developing, and you can download the source code as a zip file and use g++ or VSCode.**
