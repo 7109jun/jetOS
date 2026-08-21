@@ -1,5 +1,6 @@
-# jetOS
-<img width="1541" height="955" alt="image" src="https://github.com/user-attachments/assets/4b6156ac-b13a-4575-8c2c-117a033c413d" />
+# jetOS!
+<img width="1551" height="970" alt="image" src="https://github.com/user-attachments/assets/e842abdd-e722-44c9-9f39-938b6ecd9ce8" />
+
 
 It’s jetOS!!!!!! It’s free!!! It’s open source!!!!!!!!!!!! It’s an OS!!!!!!!
 ### It’s just the OS, that’s all. 
