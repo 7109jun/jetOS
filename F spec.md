@@ -1,1692 +1,621 @@
 <img width="1664" height="928" alt="image" src="https://github.com/user-attachments/assets/b00f1786-3846-4266-9197-d3ad79fe8d73" />
 
-# F Language Specification
+# Official F Language Learning Guide
 
-Document Version: 6
-Target Implementation: F Compiler v6
-Document Type: Specification
-
-This document defines the syntax and behavior of the F programming language in 100 items.
-Each item consists of an explanation and an example.
-Examples are written based on code that is actually compilable.
+F is a modern programming language that supports static typing, object-oriented programming through structs and methods, reference-counting-based memory management, and advanced collections such as lists and maps.
+This document is structured to help you systematically learn everything from the basic syntax of the F language to its advanced features.
 
 ---
 
-## 1. Language Name
+## Table of Contents
 
-The name of this language is F.
-It uses a single uppercase alphabet letter as its name.
-The compiler executable is named f_compiler.
-
-Language Name: F
-Compiler Name: f_compiler
-
----
-
-## 2. Language Purpose
-
-F is a programming language for system programming and general-purpose applications.
-It converts source code into native executable files.
-It operates without an interpreter.
-
-Input: F source code
-Output: Native executable file
+1. Basic Syntax and Variable Declarations
+2. Data Types
+3. Operators and Expressions
+4. Control Flow (Conditionals and Loops)
+5. Functions and Recursion
+6. Structs and Object-Oriented Programming
+7. Collections (Arrays, Lists, Maps)
+8. Strings and Memory Management
+9. Module System and Import
+10. Exception Handling and Runtime Behavior
+11. Comprehensive Practical Examples
 
 ---
 
-## 3. Source File Extension
+## 1. Basic Syntax and Variable Declarations
 
-F source files use the .fs extension.
-All source code is written in files with this extension.
+Every statement in the F language must end with a semicolon (`;`). Comments support both single-line comments using `//` and multi-line comments using `/* */`.
 
-main.fs
-math.fs
-calc.fs
-player.fs
+### 1.1 Writing Comments
 
----
+Comments are text ignored by the compiler and are used to explain code.
 
-## 4. Output File Extension
+    // This is a single-line comment.
 
-Compiled output files use the .ft extension.
-This file is an executable native binary.
+    /*
+    This is a multi-line comment.
+    It is used for code explanations or documentation.
+    */
 
-./f_compiler main.fs main.ft
+### 1.2 Variable Declaration (let)
 
----
+In the F language, variables are declared using the `let` keyword. Variables are immutable by default.
 
-## 5. Character Encoding
-
-F source files use UTF-8 encoding.
-String literals may contain UTF-8 characters.
-
-fn main() -> i32 {
-    print("korean text\n");
-    return 0;
-}
-
----
-
-## 6. Case Sensitivity
-
-F is case-sensitive for identifiers.
-Names with different letter cases are treated as different identifiers even if their spelling is otherwise identical.
-
-let value = 1;
-let Value = 2;
-let VALUE = 3;
-
-The three variables above are all different variables.
-
----
-
-## 7. Whitespace
-
-Whitespace consists of spaces, tabs, and line breaks.
-Whitespace is used to separate tokens.
-Multiple consecutive whitespace characters are treated as a single separator.
-
-let x = 10;
-let     y     =     20;
-
-The two lines above have the same meaning with respect to whitespace.
-
----
-
-## 8. Single-Line Comments
-
-A single-line comment begins with //.
-Everything from // to the end of the line is excluded from compilation.
-
-fn main() -> i32 {
-    // This line is a comment
-    print("hi\n"); // This part is also a comment
-    return 0;
-}
-
----
-
-## 9. Block Comments
-
-A block comment is written between /* and */.
-It may span multiple lines.
-
-/*
-This part
-is all a comment
-*/
-fn main() -> i32 {
-    return 0;
-}
-
----
-
-## 10. Nested Comments
-
-Block comments cannot contain other block comments.
-Nested block comments are not supported.
-
-/*
-Outer comment
-/* Inner comment is not supported */
-*/
-
-The code above is not processed successfully.
-
----
-
-## 11. Reserved Keywords
-
-The reserved keywords used by F are listed below.
-
-fn
-let
-mut
-if
-else
-while
-return
-print
-struct
-new
-delete
-impl
-self
-static
-import
-true
-false
-
----
-
-## 12. Restrictions on Reserved Keywords
-
-Reserved keywords cannot be used as variable names, function names, or struct names.
-Using a reserved keyword as an identifier causes a compilation error.
-
-let fn = 10;
-let if = 20;
-
-The code above is invalid.
-
----
-
-## 13. Identifier Starting Characters
-
-An identifier must begin with an English letter or an underscore.
-It cannot begin with a number.
-
-let value = 1;
-let _value = 2;
-
-The code above is valid.
-
-let 1value = 3;
-
-The code above is invalid.
-
----
-
-## 14. Identifier Characters
-
-The middle and remaining characters of an identifier may contain English letters, numbers, and underscores.
-Whitespace and special characters are not allowed.
-
-let player_score = 100;
-let value2 = 200;
-let max_hp_3 = 300;
-
----
-
-## 15. Forbidden Identifier Characters
-
-Spaces cannot be used inside identifiers.
-Hyphens cannot be used inside identifiers.
-Periods cannot be used inside identifiers.
-
-let player score = 10;
-let player-score = 20;
-
-Both lines above are invalid.
-
----
-
-## 16. Statement Termination
-
-Most statements end with a semicolon.
-A missing semicolon causes a compilation error.
-
-let x = 10;
-print("hi\n");
-return 0;
-
----
-
-## 17. Blocks and Semicolons
-
-Blocks are enclosed in curly braces.
-A semicolon is not placed after a block.
-
-if x > 0 {
-    print("positive\n");
-}
-
-A semicolon is not required after the closing brace.
-
----
-
-## 18. i32 Type
-
-i32 is a 32-bit integer type.
-It can store integers in approximately the range of 2.1 billion in magnitude.
-
-let count: i32 = 100;
-let negative: i32 = -50;
-
----
-
-## 19. i64 Type
-
-i64 is a 64-bit integer type.
-It can store a larger range of integers than i32.
-
-let big: i64 = 10000000000;
-
----
-
-## 20. bool Type
-
-bool is a type with only two values: true and false.
-It is used in conditional expressions.
-
-let flag: bool = true;
-let done: bool = false;
-
----
-
-## 21. str Type
-
-str is the string type.
-String literals are enclosed in double quotation marks.
-
-let name: str = "F language";
-
----
-
-## 22. struct Type
-
-struct is a user-defined type.
-It can group multiple fields under a single name.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
----
-
-## 23. Floating-Point Types Not Supported
-
-F currently does not support floating-point types.
-f32 and f64 cannot be used.
-All numeric operations are performed using integers.
-
-let value: f32 = 3.14;
-
-The code above is invalid.
-
----
-
-## 24. Integer Type Compatibility
-
-i32 and i64 are compatible with each other.
-Conversions between them are allowed for comparison and assignment.
-
-let a: i32 = 10;
-let b: i64 = a;
-
-str and integer types are not compatible.
-
----
-
-## 25. Integer Literals
-
-Integer literals are written in decimal notation.
-
-let a = 0;
-let b = 100;
-let c = 12345;
-
----
-
-## 26. Negative Literals
-
-Negative values are represented by placing the unary minus operator before a number or expression.
-
-let negative = -10;
-let result = 5 + -3;
-
----
-
-## 27. Boolean Literals
-
-true and false are boolean literals.
-
-let is_ready = true;
-let is_done = false;
-
----
-
-## 28. String Literals
-
-String literals are enclosed in double quotation marks.
-An empty string is written as "".
-
-let empty = "";
-let hello = "hello";
-let with_space = "hello world";
-
----
-
-## 29. \n Escape Sequence
-
-Within a string, \n represents a newline character.
-
-fn main() -> i32 {
-    print("line one\nline two\n");
-    return 0;
-}
-
-Output:
-
-line one
-line two
-
----
-
-## 30. \t Escape Sequence
-
-Within a string, \t represents a tab character.
-
-fn main() -> i32 {
-    print("col1\tcol2\tcol3\n");
-    return 0;
-}
-
-Output:
-
-col1    col2    col3
-
----
-
-## 31. \" Escape Sequence
-
-Within a string, \" represents a double quotation mark.
-
-fn main() -> i32 {
-    print("quote: \"F\"\n");
-    return 0;
-}
-
-Output:
-
-quote: "F"
-
----
-
-## 32. \\ Escape Sequence
-
-Within a string, \\ represents a backslash character.
-
-fn main() -> i32 {
-    print("backslash: \\\n");
-    return 0;
-}
-
-Output:
-
-backslash: \
-
----
-
-## 33. let Declaration
-
-Variables are declared using let.
-A variable must be initialized at the time it is declared.
-
-let x = 10;
-let name = "F";
-
----
-
-## 34. let Immutability Rule
-
-A variable declared with let cannot have its value changed.
-Attempting to assign a new value causes a compilation error.
-
-let x = 10;
-x = 20;
-
-The code above is invalid.
-
----
-
-## 35. let mut Declaration
-
-Variables whose values need to be changed are declared using let mut.
-
-let mut x = 10;
-x = 20;
-x = 30;
-
-The code above executes normally.
-
----
-
-## 36. Declaration and Initialization
-
-Variables must be initialized when declared.
-A variable cannot be declared without a value.
-
-let x;
-
-The code above is invalid.
-
-let x = 0;
-
-The code above is valid.
-
----
-
-## 37. Explicit Type Annotation
-
-A variable's type may be specified after a colon.
-
-let x: i32 = 10;
-let y: i64 = 20;
-let name: str = "F";
-let flag: bool = true;
-
----
-
-## 38. Type Inference
-
-If the type is omitted, the compiler infers the type from the expression.
-
-let x = 10;
-let name = "F";
-let flag = true;
-
-In the code above, x is inferred as an integer, name as str, and flag as bool.
-
----
-
-## 39. Duplicate Variable Names
-
-Variable names cannot be duplicated within the same scope.
-
-let x = 10;
-let x = 20;
-
-The code above is invalid.
-
----
-
-## 40. Variables Must Be Declared Before Use
-
-A variable must be declared before it is used.
-Using an undefined variable causes a compilation error.
-
-fn main() -> i32 {
-    print(x);
     let x = 10;
-    return 0;
-}
+    let name = "F Language";
 
-The code above is invalid.
+### 1.3 Mutable Variable Declaration (let mut)
 
----
+Variables whose values need to be changed are declared using `let mut`.
 
-## 41. Addition Operator
+    let mut counter = 0;
+    counter = counter + 1; // The value can be changed
 
-The addition operator is +.
+### 1.4 Type Annotations
 
-let a = 10;
-let b = 20;
-let sum = a + b;
+F supports type inference, but types can also be specified explicitly. A type is specified after the variable name using a colon (`:`).
 
-The value of sum is 30.
+    let age: i64 = 25;
+    let mut pi: f64 = 3.14159;
+    let is_active: bool = true;
 
----
-
-## 42. Subtraction Operator
-
-The subtraction operator is -.
-
-let a = 100;
-let b = 30;
-let diff = a - b;
-
-The value of diff is 70.
+If no type is specified, the compiler automatically infers the type based on the assigned value.
 
 ---
 
-## 43. Multiplication Operator
+## 2. Data Types
 
-The multiplication operator is *.
+F provides a variety of built-in data types.
 
-let a = 7;
-let b = 6;
-let product = a * b;
+### 2.1 Integer Types
 
-The value of product is 42.
+F supports both signed and unsigned integers in 32-bit and 64-bit sizes.
 
----
+- `i32`: 32-bit signed integer
+- `i64`: 64-bit signed integer (default integer type)
+- `u32`: 32-bit unsigned integer
+- `u64`: 64-bit unsigned integer
 
-## 44. Division Operator
+    let a: i32 = -100;
+    let b: i64 = 9223372036854775807;
+    let c: u32 = 4000000000;
+    let d: u64 = 0;
 
-The division operator is /.
-Integer division returns only the quotient.
+### 2.2 Floating-Point Types
 
-let a = 100;
-let b = 7;
-let quotient = a / b;
+F supports floating-point types following the IEEE 754 standard for real-number calculations.
 
-The value of quotient is 14.
+- `f32`: 32-bit single-precision floating-point
+- `f64`: 64-bit double-precision floating-point (default floating-point type)
 
----
+    let gravity: f64 = 9.81;
+    let temp: f32 = 36.5;
 
-## 45. Remainder Operator
+### 2.3 Boolean Type
 
-The remainder operator is %.
+The logical type used to represent true and false.
 
-let a = 100;
-let b = 7;
-let remainder = a % b;
+- `bool`: Can contain only `true` or `false`.
 
-The value of remainder is 2.
+    let is_valid: bool = true;
+    let is_empty: bool = false;
 
----
+### 2.4 String Type
 
-## 46. Integer Division Quotient
+A string type supporting UTF-8 encoding.
 
-Integer division discards the fractional part and returns only the quotient.
+- `str`: Allocated on the heap and managed using reference counting.
 
-let a = 10;
-let b = 3;
-let result = a / b;
-
-The value of result is 3, not 3.333.
+    let greeting: str = "Hello, World!";
 
 ---
 
-## 47. Comparison Operators
+## 3. Operators and Expressions
 
-The comparison operators are ==, !=, <, >, <=, and >=.
-Comparison results are 0 or 1.
+F uses operator precedence similar to C and Rust.
 
-let a = 10;
-let b = 20;
+### 3.1 Arithmetic Operators
 
-let eq = a == b;
-let ne = a != b;
-let lt = a < b;
-let gt = a > b;
-let le = a <= b;
-let ge = a >= b;
+Basic arithmetic operations are supported for both integers and floating-point values.
 
-eq is 0, ne is 1, lt is 1, gt is 0, le is 1, and ge is 0.
+- `+`: Addition
+- `-`: Subtraction
+- `*`: Multiplication
+- `/`: Division
+- `%`: Remainder
 
----
+    let sum = 10 + 5;
+    let diff = 10 - 5;
+    let prod = 10 * 5;
+    let quot = 10 / 3;
+    let rem = 10 % 3;
 
-## 48. Logical Operators
+Floating-point calculations use the same operators.
 
-The logical operators are && and ||.
-&& returns 1 when both operands are true.
-|| returns 1 when at least one operand is true.
+    let f_sum = 10.5 + 2.5;
+    let f_div = 10.0 / 3.0;
 
-let a = 1;
-let b = 0;
+### 3.2 Comparison Operators
 
-let and_result = a && b;
-let or_result = a || b;
+Comparison operators compare two values and return a `bool`.
 
-and_result is 0 and or_result is 1.
+- `==`: Equal
+- `!=`: Not equal
+- `<`: Less than
+- `>`: Greater than
+- `<=`: Less than or equal to
+- `>=`: Greater than or equal to
 
----
+    let is_equal = (10 == 10); // true
+    let is_greater = (5 > 10); // false
 
-## 49. Operator Precedence
+### 3.3 Logical Operators
 
-Multiplication and division are evaluated before addition and subtraction.
-The remainder operator has the same precedence as multiplication and division.
+Used to combine or negate Boolean values.
 
-let result = 10 + 20 * 3;
+- `&&`: Logical AND (short-circuit evaluation supported)
+- `||`: Logical OR (short-circuit evaluation supported)
 
-The value of result is 70, not 90.
+    let a = true;
+    let b = false;
 
----
+    let result_and = a && b; // false
+    let result_or = a || b;  // true
 
-## 50. Parentheses
+### 3.4 Unary Operators
 
-Expressions inside parentheses are evaluated first.
+- `-`: Negative sign (integers and floating-point values)
 
-let result = (10 + 20) * 3;
-
-The value of result is 90.
-
----
-
-## 51. Unary Minus
-
-The unary minus operator reverses the sign of a value.
-
-let a = 10;
-let b = -a;
-let c = -b;
-
-b is -10 and c is 10.
+    let neg = -10;
+    let f_neg = -3.14;
 
 ---
 
-## 52. Function Definition
+## 4. Control Flow (Conditionals and Loops)
 
-Functions are defined using fn.
-A parameter list is written in parentheses after the function name.
+These statements control the execution flow of a program.
 
-fn add(a: i32, b: i32) -> i32 {
-    return a + b;
-}
+### 4.1 if-else Statement
 
----
+Branches execution according to a condition. The condition must be of type `bool` or an integer/floating-point type.
 
-## 53. Parameter Declarations
+    let x = 10;
 
-Parameter types must always be specified.
-Omitting a parameter type causes a compilation error.
-
-fn add(a, b) -> i32 {
-    return a + b;
-}
-
-The code above is invalid.
-
-fn add(a: i32, b: i32) -> i32 {
-    return a + b;
-}
-
-The code above is valid.
-
----
-
-## 54. Return Type Declaration
-
-The return type is specified after the parameter list using ->.
-
-fn get_value() -> i32 {
-    return 42;
-}
-
----
-
-## 55. void Return Type
-
-If the return type is omitted, the function has a void return type.
-A void function does not return a value.
-
-fn greet() {
-    print("hello\n");
-}
-
----
-
-## 56. return Statement
-
-The return statement returns a value.
-When return is encountered, function execution terminates immediately.
-
-fn check(x: i32) -> i32 {
-    if x > 0 {
-        return 1;
+    if x > 5 {
+        print("x is greater than 5");
+    } else if x == 5 {
+        print("x is equal to 5");
+    } else {
+        print("x is less than 5");
     }
-    return 0;
-}
+
+### 4.2 while Statement
+
+Repeatedly executes the code inside the block while the condition is true.
+
+    let mut count = 0;
+
+    while count < 5 {
+        print(count);
+        count = count + 1;
+    }
+
+An infinite loop can be written using `while true`, and it can be exited using `return` from inside the loop.
+
+    let mut i = 0;
+    while true {
+        if i >= 10 {
+            return;
+        }
+        i = i + 1;
+    }
 
 ---
 
-## 57. Required main Function
+## 5. Functions and Recursion
 
-A program must contain exactly one main function.
-Execution begins from the main function.
+Functions are defined using the `fn` keyword.
 
-fn main() -> i32 {
-    print("program start\n");
-    return 0;
-}
+### 5.1 Basic Function Definition
 
-If main is missing, a compilation error occurs.
+A function has a name, parameter list, and return type. If there is no return type, `void` may be specified or omitted.
 
----
+    fn add(a: i64, b: i64) -> i64 {
+        return a + b;
+    }
 
-## 58. Exit Code
+    fn greet() {
+        print("Hello from function!");
+    }
 
-The return value of main becomes the program's exit code.
-0 indicates normal termination.
-A non-zero value indicates abnormal termination.
+### 5.2 Function Calls
 
-fn main() -> i32 {
-    return 0;
-}
+Defined functions are called using their name and arguments. F uses a stack calling convention, so there is no limit on the number of arguments.
 
----
-
-## 59. Function Calls
-
-Functions are called using their name followed by parentheses.
-Arguments are placed inside the parentheses.
-
-fn add(a: i32, b: i32) -> i32 {
-    return a + b;
-}
-
-fn main() -> i32 {
-    let result = add(10, 20);
+    let result = add(5, 10);
     print(result);
-    return 0;
-}
 
----
+    greet();
 
-## 60. Duplicate Function Names
+### 5.3 Recursive Functions
 
-Function names cannot be duplicated.
-Defining two functions with the same name causes a compilation error.
+A function can call itself from within its own body. Since recursive calls consume stack space, an appropriate termination condition is required.
 
-fn test() {
-    print("one\n");
-}
-
-fn test() {
-    print("two\n");
-}
-
-The code above is invalid.
-
----
-
-## 61. if Statement
-
-if executes a block when its condition is true.
-A condition is considered true when its value is non-zero.
-
-fn main() -> i32 {
-    let x = 10;
-
-    if x > 0 {
-        print("positive\n");
+    fn factorial(n: i64) -> i64 {
+        if n <= 1 {
+            return 1;
+        }
+        return n * factorial(n - 1);
     }
 
-    return 0;
-}
+    let fact_5 = factorial(5);
+    print(fact_5); // Outputs 120
 
 ---
 
-## 62. Condition Value Rules
+## 6. Structs and Object-Oriented Programming
 
-The conditions of if and while must be integer or bool values.
-Strings cannot be used as conditions.
+F supports object-oriented programming through `struct` and `impl`.
 
-if name {
-    print("invalid\n");
-}
+### 6.1 Struct Definition
 
-If name has type str, the code above is invalid.
+The `struct` keyword is used to create user-defined data types.
 
----
-
-## 63. else Statement
-
-An else block executes when the condition is false.
-
-fn main() -> i32 {
-    let x = 0;
-
-    if x > 0 {
-        print("positive\n");
-    } else {
-        print("not positive\n");
+    struct Point {
+        x: f64,
+        y: f64
     }
 
-    return 0;
-}
-
----
-
-## 64. else if Statement
-
-else if can be used to chain multiple conditions.
-
-fn main() -> i32 {
-    let score = 85;
-
-    if score >= 90 {
-        print("A\n");
-    } else if score >= 80 {
-        print("B\n");
-    } else if score >= 70 {
-        print("C\n");
-    } else {
-        print("F\n");
+    struct User {
+        id: i64,
+        name: str,
+        is_active: bool
     }
 
-    return 0;
-}
+### 6.2 Creating Struct Instances
 
----
+The `new` keyword is used to create a struct instance. All fields must be initialized.
 
-## 65. while Statement
+    let p1 = new Point {
+        x: 10.0,
+        y: 20.0
+    };
 
-while repeatedly executes a block while its condition is true.
+    let user1 = new User {
+        id: 1,
+        name: "Alice",
+        is_active: true
+    };
 
-fn main() -> i32 {
-    let mut i = 0;
+### 6.3 Field Access
 
-    while i < 5 {
-        print(i);
-        print("\n");
-        i = i + 1;
-    }
+The dot (`.`) operator is used to access fields of a struct.
 
-    return 0;
-}
+    print(p1.x);
+    print(user1.name);
 
-Output:
+    // Modify fields of a mutable instance
+    let mut p2 = new Point { x: 0.0, y: 0.0 };
+    p2.x = 5.0;
+    p2.y = 15.0;
 
-0
-1
-2
-3
-4
+### 6.4 Method Definition (impl)
 
----
+Methods can be added to a struct using an `impl` block.
+An instance method receives `self` or `mut self` as its first parameter.
 
-## 66. Nested if
+    impl Point {
+        // Instance method
+        fn distance_from_origin(self) -> f64 {
+            return (self.x * self.x + self.y * self.y);
+        }
 
-An if statement may contain another if statement.
-
-fn main() -> i32 {
-    let x = 10;
-    let y = 20;
-
-    if x > 0 {
-        if y > 0 {
-            print("both positive\n");
+        // Mutable instance method
+        fn translate(mut self, dx: f64, dy: f64) {
+            self.x = self.x + dx;
+            self.y = self.y + dy;
         }
     }
 
-    return 0;
-}
+### 6.5 Method Calls
 
----
+Instance methods are called using the object name followed by a dot and the method name.
 
-## 67. Nested while
+    let p = new Point { x: 3.0, y: 4.0 };
+    let dist = p.distance_from_origin();
+    print(dist);
 
-A while loop may contain another while loop.
+    p.translate(1.0, 2.0);
+    print(p.x); // Outputs 4.0
 
-fn main() -> i32 {
-    let mut i = 0;
+### 6.6 Static Methods
 
-    while i < 3 {
-        let mut j = 0;
-        while j < 3 {
-            print("*");
-            j = j + 1;
+The `static` keyword can be used to define static methods that can be called using the class name without an instance.
+
+    impl Point {
+        static fn new_point(x: f64, y: f64) -> Point {
+            return new Point { x: x, y: y };
         }
-        print("\n");
-        i = i + 1;
     }
 
-    return 0;
-}
-
-Output:
-
-***
-***
-***
+    // Call
+    let p3 = Point.new_point(5.0, 5.0);
 
 ---
 
-## 68. print Function
+## 7. Collections (Arrays, Lists, Maps)
 
-print outputs a value to the screen.
-It can output integers and strings.
+F provides collections for managing data in groups.
 
-fn main() -> i32 {
-    print("hello\n");
-    print(100);
-    return 0;
-}
+### 7.1 Fixed-Size Array (Array)
 
----
+A fixed-size array whose size is determined at compile time. The syntax is `[T; N]`.
 
-## 69. Integer Output
+    let arr = [1, 2, 3, 4, 5];
+    print(arr[0]); // Outputs 1
 
-Passing an integer to print outputs the number.
+    let mut arr2: [i64; 3] = [10, 20, 30];
+    arr2[1] = 99;
+    print(arr2[1]); // Outputs 99
 
-fn main() -> i32 {
-    print(42);
-    print("\n");
-    print(-10);
-    print("\n");
-    return 0;
-}
+Array indices start at 0, and accessing an element outside the valid range causes a runtime error.
 
-Output:
+### 7.2 Dynamic List (List)
 
-42
--10
+A list whose size can change dynamically. It is declared using `List<T>`.
 
----
+    let mut list = List<i64>.new();
 
-## 70. String Output
+    list.push(10);
+    list.push(20);
+    list.push(30);
 
-Passing a string to print outputs the string as-is.
+    print(list.len()); // Outputs 3
+    print(list.get(1)); // 20
 
-fn main() -> i32 {
-    print("F language\n");
-    return 0;
-}
+    list.set(1, 99);
+    print(list.get(1)); // 99
 
-Output:
+### 7.3 Map (Map)
 
-F language
+A hash map that stores key-value pairs. It is declared using `Map<K, V>`.
 
----
+    let mut map = Map<i64, str>.new();
 
-## 71. print Does Not Add a Newline
+    map.set(1, "One");
+    map.set(2, "Two");
+    map.set(3, "Three");
 
-print does not automatically add a newline after output.
-If a newline is required, \n must be included in the string.
+    let val = map.get(2);
+    print(val); // "Two"
 
-fn main() -> i32 {
-    print("one");
-    print("two");
-    print("\n");
-    return 0;
-}
-
-Output:
-
-onetwo
+If the specified key does not exist, `get` returns a value corresponding to 0 or null.
 
 ---
 
-## 72. struct Definition
+## 8. Strings and Memory Management
 
-A struct is defined using the struct keyword.
-The struct name is followed by a field list enclosed in braces.
+F performs automatic reference-counting-based memory management for strings (`str`) and struct instances.
 
-struct Point {
-    x: i32,
-    y: i32
-}
+### 8.1 How Reference Counting Works
 
----
+When a string or struct is assigned to a variable, its reference count increases by 1 (`retain`). When the variable's scope ends or another value is assigned, the reference count decreases by 1 (`release`). When the reference count reaches 0, the memory is automatically freed.
 
-## 73. struct Fields
+    fn create_string() -> str {
+        let s = "Hello";
+        return s; // Reference-counting logic is automatically inserted on return
+    }
 
-A struct contains a list of fields.
-Each field has a name and a type.
+    let my_str = create_string();
+    print(my_str);
+    // Memory is freed when the scope of my_str ends
 
-struct Player {
-    hp: i32,
-    mp: i32,
-    name: str
-}
+### 8.2 Explicit Memory Deallocation (delete)
 
----
+Reference counting is normally handled automatically, but the `delete` keyword can be used when a circular reference occurs or when memory needs to be freed immediately.
 
-## 74. struct Field Types
-
-Struct fields may use i32, i64, and str types.
-
-struct Item {
-    id: i32,
-    count: i64,
-    name: str
-}
-
----
-
-## 75. new Construction
-
-Struct values are created using new.
-new creates the value in heap memory.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-fn main() -> i32 {
-    let p = new Point {
-        x: 10,
-        y: 20
-    };
-
-    delete p;
-    return 0;
-}
-
----
-
-## 76. Field Initialization Rules
-
-All fields must be initialized when using new.
-If even one field is missing, a compilation error occurs.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-fn main() -> i32 {
-    let p = new Point {
-        x: 10
-    };
-
-    delete p;
-    return 0;
-}
-
-The code above is invalid because the y field is missing.
-
----
-
-## 77. Field Access
-
-A field is accessed by placing a period followed by the field name after the variable name.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-fn main() -> i32 {
-    let p = new Point {
-        x: 10,
-        y: 20
-    };
-
-    print(p.x);
-    print("\n");
-    print(p.y);
-    print("\n");
-
-    delete p;
-    return 0;
-}
-
-Output:
-
-10
-20
-
----
-
-## 78. Field Modification
-
-Fields can only be modified through a variable declared with let mut.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-fn main() -> i32 {
-    let mut p = new Point {
-        x: 10,
-        y: 20
-    };
-
-    p.x = 100;
-
-    print(p.x);
-    print("\n");
-
-    delete p;
-    return 0;
-}
-
-Output:
-
-100
-
-Modifying a field through a variable declared with let causes a compilation error.
-
----
-
-## 79. Heap Memory
-
-Values created with new are stored in heap memory.
-Heap memory remains allocated after the function that created it ends.
-Heap memory must be released using delete.
-
-struct Data {
-    value: i32
-}
-
-fn main() -> i32 {
-    let d = new Data {
-        value: 100
-    };
-
-    delete d;
-    return 0;
-}
-
----
-
-## 80. delete Statement
-
-delete releases heap memory.
-It can only be used with values created by new.
-
-struct Data {
-    value: i32
-}
-
-fn main() -> i32 {
-    let d = new Data {
-        value: 100
-    };
-
-    delete d;
-    return 0;
-}
-
----
-
-## 81. Reference Counting
-
-Strings are managed using reference counting.
-When a string is assigned to a variable, its reference count increases.
-When the string is released using delete, its reference count decreases.
-
-fn main() -> i32 {
-    let s = "hello";
-    let t = s;
-
+    let mut s = "Temporary String";
+    // Free the memory immediately after using s
     delete s;
-    delete t;
 
-    return 0;
-}
+`delete` can only be used with `str` and `struct` types.
 
 ---
 
-## 82. Duplicate delete Calls
+## 9. Module System and Import
 
-The same value must not be passed to delete twice.
-Double-free is undefined behavior.
+F manages files as modules. The `import` keyword is used to import code from another file.
 
-struct Data {
-    value: i32
-}
+### 9.1 Importing Modules
 
-fn main() -> i32 {
-    let d = new Data {
-        value: 100
-    };
+The `import` statement can only be used at the top level of a file and must end with a semicolon.
 
-    delete d;
-    delete d;
+    import math;
+    import utils;
 
-    return 0;
-}
+When the compiler encounters `import math;`, it searches the current directory for the `math.fs` file and includes it in the compilation process. Files that have already been visited are not compiled again.
 
-The second delete causes a problem.
-
----
-
-## 83. impl Block
-
-Methods are defined inside an impl block.
-The name of the struct is written after impl.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-impl Point {
-    fn sum(self) -> i32 {
-        return self.x + self.y;
-    }
-}
-
----
-
-## 84. Instance Method Definition
-
-The first parameter of an instance method is self.
-self refers to the object on which the method was called.
-
-struct Counter {
-    value: i32
-}
-
-impl Counter {
-    fn get(self) -> i32 {
-        return self.value;
-    }
-}
-
----
-
-## 85. self Parameter
-
-self can be used to access fields.
-self.x refers to the x field of the current object.
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-impl Point {
-    fn sum(self) -> i32 {
-        return self.x + self.y;
-    }
-}
-
----
-
-## 86. mut self Parameter
-
-mut self must be used when modifying the fields of self.
-
-struct Counter {
-    value: i32
-}
-
-impl Counter {
-    fn increment(mut self) {
-        self.value = self.value + 1;
-    }
-}
-
-Fields cannot be modified without mut self.
-
----
-
-## 87. Static Method Definition
-
-Static methods are defined using static fn.
-Static methods do not use self.
-
-struct Math {
-    value: i32
-}
-
-impl Math {
-    static fn answer() -> i32 {
-        return 42;
-    }
-}
-
----
-
-## 88. Instance Method Calls
-
-Instance methods are called using variable.method().
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-impl Point {
-    fn sum(self) -> i32 {
-        return self.x + self.y;
-    }
-}
-
-fn main() -> i32 {
-    let p = new Point {
-        x: 3,
-        y: 4
-    };
-
-    print(p.sum());
-    print("\n");
-
-    delete p;
-    return 0;
-}
-
-Output:
-
-7
-
----
-
-## 89. Static Method Calls
-
-Static methods are called using Struct.method().
-
-struct Math {
-    value: i32
-}
-
-impl Math {
-    static fn answer() -> i32 {
-        return 42;
-    }
-}
-
-fn main() -> i32 {
-    print(Math.answer());
-    print("\n");
-    return 0;
-}
-
-Output:
-
-42
-
----
-
-## 90. import Statement
-
-import loads another file.
-The module name is written after import and the statement ends with a semicolon.
-
-import math;
-
-The code above loads the math.fs file.
-
----
-
-## 91. Module File Resolution
-
-import math; searches for math.fs in the same directory.
-If the file does not exist, a compilation error occurs.
-
-project/
-├── main.fs
-└── math.fs
-
-If main.fs contains import math;, math.fs is loaded.
-
----
-
-## 92. Duplicate Import Prevention
-
-The same file is not loaded more than once.
-Even if import is written multiple times, the file is included only once.
-
-import math;
-import math;
-import math;
-
-The code above loads math.fs only once.
-
----
-
-## 93. Compilation Command
-
-Compilation is performed using f_compiler.
-The first argument is the input file, and the second argument is the output file.
-
-./f_compiler main.fs main.ft
-
----
-
-## 94. Granting Execute Permission
-
-The output file must be given execute permission before it can be run.
-
-chmod +x main.ft
-
----
-
-## 95. Execution
-
-After granting execute permission, the file can be executed.
-
-./main.ft
-
-The exit code can be checked using echo $?.
-
-./main.ft
-echo $?
-
----
-
-## 96. Undefined Variable Error
-
-Using an undefined variable causes a compilation error.
-
-fn main() -> i32 {
-    print(x);
-    return 0;
-}
-
-The code above is invalid because x is not defined.
-
----
-
-## 97. Type Mismatch Error
-
-An assignment with incompatible types causes a compilation error.
-
-fn main() -> i32 {
-    let x: i32 = "hello";
-    return 0;
-}
-
-The code above is invalid because a str value is assigned to an i32 variable.
-
----
-
-## 98. Immutable Variable Assignment Error
-
-Assigning a new value to a variable declared with let causes a compilation error.
-
-fn main() -> i32 {
-    let x = 10;
-    x = 20;
-    return 0;
-}
-
-The code above is invalid because x is immutable.
-
----
-
-## 99. Division by Zero Error
-
-Dividing by zero causes a runtime error.
-It is not detected at compile time.
-
-fn main() -> i32 {
-    let a = 10;
-    let b = 0;
-    let result = a / b;
-    return 0;
-}
-
-The code above terminates with a runtime error.
-
----
-
-## 100. Missing Field Error
-
-If even one field is missing when using new, a compilation error occurs.
-
-struct Point {
-    x: i32,
-    y: i32,
-    z: i32
-}
-
-fn main() -> i32 {
-    let p = new Point {
-        x: 1,
-        y: 2
-    };
-
-    delete p;
-    return 0;
-}
-
-The code above is invalid because the z field is missing.
-
----
-
-## Complete Example Program 1: Calculator
-
-fn print_num(n: i32) {
-    print(n);
-}
-
-fn main() -> i32 {
-    print("=== F Calculator ===\n");
-
-    let a = 100;
-    let b = 7;
-
-    print("a = "); print_num(a); print("\n");
-    print("b = "); print_num(b); print("\n\n");
-
-    print("a + b = ");
-    print_num(a + b);
-    print("\n");
-
-    print("a - b = ");
-    print_num(a - b);
-    print("\n");
-
-    print("a * b = ");
-    print_num(a * b);
-    print("\n");
-
-    print("a / b = ");
-    print_num(a / b);
-    print("\n");
-
-    print("a % b = ");
-    print_num(a % b);
-    print("\n\n");
-
-    print("(a + b) * 3 - 10 = ");
-    print_num((a + b) * 3 - 10);
-    print("\n");
-
-    print("a > b = ");
-    print_num(a > b);
-    print("\n");
-
-    print("a == 100 = ");
-    print_num(a == 100);
-    print("\n");
-
-    let mut result = 0;
-    if b != 0 {
-        result = a / b;
-    } else {
-        print("ERROR: division by zero\n");
-    }
-
-    print("safe div result = ");
-    print_num(result);
-    print("\n");
-
-    print("\n=== Done ===\n");
-    return 0;
-}
-
----
-
-## Complete Example Program 2: struct and Methods
-
-struct Point {
-    x: i32,
-    y: i32
-}
-
-impl Point {
-    fn sum(self) -> i32 {
-        return self.x + self.y;
-    }
-
-    fn add(mut self, value: i32) -> i32 {
-        self.x = self.x + value;
-        return self.x;
-    }
-
-    static fn answer() -> i32 {
-        return 42;
-    }
-}
-
-fn main() -> i32 {
-    print("=== Point Example ===\n");
-
-    let mut p = new Point {
-        x: 3,
-        y: 4
-    };
-
-    print("p.sum() = ");
-    print(p.sum());
-    print("\n");
-
-    print("p.add(10) = ");
-    print(p.add(10));
-    print("\n");
-
-    print("p.sum() after add = ");
-    print(p.sum());
-    print("\n");
-
-    print("Point.answer() = ");
-    print(Point.answer());
-    print("\n");
-
-    delete p;
-
-    print("=== Done ===\n");
-    return 0;
-}
-
----
-
-## Complete Example Program 3: import and Modules
+### 9.2 Module Example
 
 math.fs:
 
-fn square(x: i32) -> i32 {
-    return x * x;
-}
+    fn square(x: i64) -> i64 {
+        return x * x;
+    }
 
-fn cube(x: i32) -> i32 {
-    return x * x * x;
-}
+    fn cube(x: i64) -> i64 {
+        return x * x * x;
+    }
 
 main.fs:
 
-import math;
+    import math;
 
-fn main() -> i32 {
-    print("=== Import Example ===\n");
-
-    let value = 5;
-
-    print("square(5) = ");
-    print(square(value));
-    print("\n");
-
-    print("cube(5) = ");
-    print(cube(value));
-    print("\n");
-
-    print("=== Done ===\n");
-    return 0;
-}
+    fn main() {
+        let val = math.square(5);
+        print(val); // Outputs 25
+    }
 
 ---
 
-## Compilation and Execution Procedure
+## 10. Exception Handling and Runtime Behavior
 
-# Step 1: Compile
-./f_compiler main.fs main.ft
+F detects and handles certain errors at compile time and runtime.
 
-# Step 2: Grant execute permission
-chmod +x main.ft
+### 10.1 Division by Zero
 
-# Step 3: Execute
-./main.ft
+- **Compile time:** Division by zero between literal values produces a compilation error.
 
-# Step 4: Check the exit code
-echo $?
+      let x = 10 / 0; // Compilation error: F1004: division by zero
+
+- **Runtime:** When division by zero occurs using variables, the program does not crash and instead returns `0`.
+
+      let a = 10;
+      let b = 0;
+      let c = a / b; // c becomes 0
+
+### 10.2 Array and List Index Out of Bounds
+
+Accessing an array or list outside its valid index range causes a runtime trap.
+
+    let arr = [1, 2, 3];
+    print(arr[5]); // Runtime error: runtime error: index out of bounds
+
+If the index is negative or greater than or equal to the length, the program prints an error message and terminates immediately.
 
 ---
 
-## Error Message Format
+## 11. Comprehensive Practical Examples
 
-Compilation errors are printed in the following format.
+These are practical examples combining various features of the F language.
 
-F Compiler Error: <error message>
+### 11.1 Simple Calculator
 
-Linker errors are printed in the following format.
+A simple four-operation calculator using structs and methods.
 
-Link Error: undefined function '<function name>'
+    struct Calculator {
+        result: f64
+    }
+
+    impl Calculator {
+        static fn new() -> Calculator {
+            return new Calculator { result: 0.0 };
+        }
+
+        fn add(mut self, value: f64) {
+            self.result = self.result + value;
+        }
+
+        fn subtract(mut self, value: f64) {
+            self.result = self.result - value;
+        }
+
+        fn multiply(mut self, value: f64) {
+            self.result = self.result * value;
+        }
+
+        fn divide(mut self, value: f64) {
+            if value != 0.0 {
+                self.result = self.result / value;
+            }
+        }
+
+        fn get_result(self) -> f64 {
+            return self.result;
+        }
+    }
+
+    fn main() {
+        let mut calc = Calculator.new();
+
+        calc.add(10.0);
+        calc.multiply(5.0);
+        calc.subtract(15.0);
+        calc.divide(2.0);
+
+        let final_result = calc.get_result();
+        print(final_result); // Outputs 17.5
+    }
+
+### 11.2 Data Management Using a List
+
+An example of storing and processing data using a dynamic list.
+
+    fn main() {
+        let mut numbers = List<i64>.new();
+
+        // Add values from 1 to 5
+        let mut i = 1;
+        while i <= 5 {
+            numbers.push(i * 10);
+            i = i + 1;
+        }
+
+        // Print all elements
+        let len = numbers.len();
+        let mut idx = 0;
+        while idx < len {
+            print(numbers.get(idx));
+            idx = idx + 1;
+        }
+
+        // Modify a specific element
+        numbers.set(2, 999);
+        print(numbers.get(2)); // Outputs 999
+    }
+
+### 11.3 Fibonacci Sequence Using Recursion
+
+An example of calculating the Fibonacci sequence using recursive function calls.
+
+    fn fibonacci(n: i64) -> i64 {
+        if n <= 0 {
+            return 0;
+        }
+        if n == 1 {
+            return 1;
+        }
+        return fibonacci(n - 1) + fibonacci(n - 2);
+    }
+
+    fn main() {
+        let mut i = 0;
+        while i < 10 {
+            let fib_val = fibonacci(i);
+            print(fib_val);
+            i = i + 1;
+        }
+    }
+
+### 11.4 Calculating Word Frequency Using a Map (Concept)
+
+An example of managing simple key-value data using a map.
+
+    fn main() {
+        let mut scores = Map<i64, i64>.new();
+
+        scores.set(1, 100);
+        scores.set(2, 85);
+        scores.set(3, 92);
+
+        // Update the score
+        let current_score = scores.get(2);
+        scores.set(2, current_score + 5);
+
+        print(scores.get(2)); // Outputs 90
+    }
 
 ---
 
-## Document End
+## Appendix: F Language Compiler Architecture Summary
 
-This document is version 6 of the F Language Specification.
-It consists of 100 items in total.
-The examples are based on code that is compilable with F Compiler v6.
+The F language compiler is written as a single C file and generates executables on its own without external libraries.
+
+- **Lexer & Parser:** Tokenizes source code and converts it into an AST (Abstract Syntax Tree).
+- **Optimizer:** Optimizes the AST through techniques such as Constant Folding.
+- **Code Generation (Codegen):** Directly converts the AST into x86-64 machine code.
+- **Runtime:** Memory allocation, reference counting, I/O functions, and other runtime functionality are included directly inside the binary.
+- **Output Format:** On Windows, it directly assembles a PE32+ `.exe` file; on Linux, it directly assembles an ELF executable.
+
+Through this guide, you should be able to sufficiently understand and use the core features of the F language. Additional feature extensions and syntax improvements will be implemented alongside updates to the compiler source code.
