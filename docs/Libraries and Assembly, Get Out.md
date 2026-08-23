@@ -100,7 +100,7 @@ And one day, you update something and suddenly the project won't build.
 
 You changed one library, and suddenly the entire project is falling apart.
 
-> #### I fucking hate libraries.
+> #### Libraries are a huge pain.
 
 ---
 
