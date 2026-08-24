@@ -7,6 +7,9 @@ It’s jetOS!!!!!! It’s free!!! It’s open source!!!!!!!!!!!! It’s an OS!!!
 >**Yeah**
 ```good bye!```
 <img width="1621" height="1215" alt="스크린샷 2026-08-12 170020" src="https://github.com/user-attachments/assets/6d6bfa18-8e89-4d5e-9c1c-46c87767163f" />
+
+
+
 ##  Documentation
 
 Understanding JetOS is easier than you think. Check out our guides:
