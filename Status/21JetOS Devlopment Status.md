@@ -4,7 +4,7 @@
 > Build environment: x86_64-w64-mingw32-gcc (bootloader) + gcc (kernel) + QEMU+OVMF (testing)
 > Verification method: Full kernel compilation + linking passed, followed by **actual QEMU boot verification with serial logs/screenshots**
 >
-> This document is written so that the current state of JetOS can be fully understood using only this document and the latest tar file (`JetOS_Milestone21.tar`).
+> This document is written so that the current state of JetOS can be fully understood using only this document and the latest tar file (`JetOS_Milestone21.zip`).
 
 ---
 
