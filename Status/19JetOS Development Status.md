@@ -5,7 +5,7 @@
 > Verification method: Full kernel compilation + linking verified, plus **actual QEMU boot with serial logs/screenshots checked**
 > (QEMU was installed in the sandbox starting from Milestone 10, making real-boot verification possible. Since then, every milestone has been verified through actual booting.) Milestone 19's cryptographic code (TLS stack) additionally underwent **host harness testing** (compiled with normal Linux gcc and compared against official NIST/RFC test vectors and actual OpenSSL-generated certificates) — this was done to separately verify protocol/kernel integration issues from the correctness of the cryptographic algorithms themselves.
 >
-> This document is written so that the entire current state can be understood using only this document + the latest tar file (`JetOS_Milestone19.tar`).
+> This document is written so that the entire current state can be understood using only this document + the latest tar file (`JetOS_Milestone19.zip`).
 
 ---
 
