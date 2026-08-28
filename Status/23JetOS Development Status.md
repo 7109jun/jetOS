@@ -1,30 +1,30 @@
-# JetOS 개발 현황
+# JetOS Development Status
 
-> 마지막 업데이트: Milestone 23 완료 시점
-> 빌드 환경: x86_64-w64-mingw32-gcc (부트로더) + gcc (커널) + QEMU+OVMF (테스트)
-> 검증 방식: 전체 커널 컴파일+링크 통과 확인 + **실제 QEMU 부팅으로 시리얼 로그/스크린샷 확인**
-> + Milestone 23에서는 대용량 파일 시나리오를 위해 **호스트 스파스파일 하네스 테스트**도 추가.
+> Last updated: Milestone 23 completion
+> Build environment: x86_64-w64-mingw32-gcc (bootloader) + gcc (kernel) + QEMU+OVMF (testing)
+> Verification method: Full kernel compile/link verification + **actual QEMU boot with serial logs/screenshots**
 >
-> 이 문서 + 최신 tar 파일(`JetOS_Milestone23.tar`)만 있으면 현재 상태를 전부 파악할 수 있도록 작성했다.
+> * Milestone 23 also added a **host sparse-file harness test** for large-file scenarios.
+>
+> This document + the latest tar file (`JetOS_Milestone23.tar`) are intended to provide everything needed to fully understand the current state of the project.
 
 ---
 
-## 철학
+## Philosophy
 
-> **"Windows를 쓰고 싶지만 돈이 없는 사람"**을 위한 OS.
+> **"An OS for people who want to use Windows but cannot afford it."**
 >
-> Milestone 23은 두 가지: ①GUI의 "픽셀아트 느낌"을 최대한 없애기(폰트/도형 안티에일리어싱)
-> ②JETFS 파일당 최대 크기를 20GB까지(구조적으로는 그보다 훨씬 크게) 늘리기. 두 번째 작업은
-> ReactOS와 Linux(ext2)의 설계를 **개념만 참고**했다 — "포인터를 담은 블록을 한 단계씩 더
-> 두면 주소 공간이 1024배씩 커진다"는 고전적인 아이디어(직접+단일+이중+삼중 간접 블록)를
-> 그대로 이해하고 이 프로젝트 스타일대로 처음부터 다시 작성했을 뿐, 코드를 옮기거나 베낀
-> 부분은 없다.
+> Milestone 23 has two main goals:
+> ① Remove as much of the "pixel art" appearance from the GUI as possible (font/shape anti-aliasing)
+> ② Increase the maximum JETFS file size to 20GB (with a structural capacity far beyond that).
+>
+> The second part conceptually references the design ideas behind ReactOS and Linux/ext2 — specifically, the classic idea that "adding another level of blocks containing pointers increases the addressable space by a factor of 1024 each time" (direct + single indirect + double indirect + triple indirect blocks). The implementation was written from scratch in the style of this project; no code was copied or ported.
 
 ---
 
-## 빌드 & 실행 방법
+## Build & Run
 
-M22 문서와 동일. 추가 사항 없음.
+Same as the M22 documentation. No additional steps are required.
 
 ```bash
 make
@@ -34,180 +34,262 @@ make esp
 ./scripts/run_qemu.sh
 ```
 
-### 20GB급 파일을 실제로 써보려면
-JETFS 자체는 이제 구조적으로 약 4TB까지 파일 하나를 지원하지만, **실제로 담을 수 있는
-크기는 디스크 이미지 자체 크기가 상한**이다. 20GB짜리 파일을 실제로 테스트하려면 디스크
-이미지 자체를 그만큼 크게 만들어야 한다:
+### Actually testing 20GB-class files
+
+JETFS can now structurally support a single file of approximately **4TB**, but the actual usable file size is limited by the size of the disk image itself.
+
+To actually test a 20GB file, the disk image itself must be large enough:
+
 ```bash
 ./build/mkjetfs build/jetfs.img 20480   # 20480MB = 20GB
 ```
-**주의**: `tools/mkjetfs.c`(실제로 배포되는 도구)는 포맷할 때 데이터 영역 전체를 실제로
-0으로 채워쓴다(스파스 파일이 아님) — 20GB를 지정하면 정말로 20GB의 실제 디스크 공간을
-쓴다. 이 개발 샌드박스처럼 여유 디스크가 부족한 환경에서 큰 이미지를 실험해보고 싶다면,
-아래 "검증 방법론"에서 설명하는 스파스 방식 호스트 테스트 도구를 참고할 것.
 
-### 검증 방법론 (M23에서 추가)
-Milestone 22까지의 세 가지(호스트 하네스 테스트 / QEMU 부팅+시리얼 로그 / QEMU 모니터+
-screendump)에 더해:
+**Warning:** `tools/mkjetfs.c` (the tool actually distributed with the project) writes zeros across the entire data area when formatting; it does **not** create a sparse file. Therefore, specifying 20GB really consumes approximately 20GB of physical disk space.
 
-6. **대용량 파일은 호스트 스파스파일 하네스로 검증**: JETFS의 삼중 간접 블록 경계
-   (약 4.004GB)를 실제로 넘기려면 그만큼의 데이터를 써야 하는데, 이 샌드박스의 QEMU
-   부팅 자체 테스트로는 시간/디스크 용량 둘 다 감당하기 어렵다(실제 배포용 `mkjetfs`는
-   포맷 시 디스크 전체를 0으로 채워쓰기 때문에 4GB+ 이미지 자체를 만드는 것도 샌드박스
-   여유 공간을 크게 잡아먹는다 — 실제로 이 문제를 겪었다, 아래 버그 히스토리 참고).
-   대신 `kernel/fs/jetfs.c`를 호스트 gcc로 그대로 컴파일하고, `ahci_read/write_sectors`만
-   호스트 파일의 `pread`/`pwrite`로 스텁 교체한 뒤, **`ftruncate`로 크기만 잡은 진짜
-   스파스 파일**(안 건드린 부분은 실제 디스크를 안 씀)을 백업 디스크로 써서 4.3GB
-   짜리 파일을 실제로 만들고 검증했다 — 코드 자체는 커널에 들어가는 것과 100% 동일한
-   `jetfs.c`이므로, 이건 "재구현해서 따로 테스트"가 아니라 "실제 코드를 다른 I/O 백엔드로
-   돌려본 것"에 가깝다.
+If you are working in a development sandbox with limited free disk space and want to experiment with large images, see the sparse-file host testing methodology below.
+
+### Verification Methodology (Added in M23)
+
+In addition to the three methods used through M22 (host harness tests / QEMU boot + serial logs / QEMU monitor + screendump), M23 adds:
+
+6. **Large files are verified using a host sparse-file harness:**
+   Crossing the triple-indirect boundary (approximately **4.004GB**) with real data would require writing several gigabytes. Doing this directly through the QEMU boot test is impractical in this sandbox because of both execution time and available disk space.
+
+   Instead, `kernel/fs/jetfs.c` is compiled directly with host GCC, while only `ahci_read/write_sectors` are stubbed out and replaced with `pread`/`pwrite` operations against a host file.
+
+   The backing disk is a **real sparse file** whose size is established using `ftruncate`; untouched regions therefore consume virtually no physical disk space.
+
+   This setup was used to create and verify an actual **4.3GB file** while exercising the exact same `jetfs.c` code that is compiled into the kernel. This is therefore not a separate reimplementation for testing, but rather the production filesystem code running against a different I/O backend.
 
 ---
 
-## 디렉터리 구조 (M23 기준, M22 대비 변경만 표시)
+## Directory Structure
 
-```
+### M23 changes compared with M22
+
+```text
 JetOS/
 ├── kernel/drivers/
-│   ├── console.c/h    M23: 정수 전용(부동소수점 없이) 바이리니어 보간 안티에일리어싱
-│   │                    글리프 렌더러로 교체. console_blend_pixel() 공개 API 신설
-│   │                    (좌표+coverage(0~256)+색 받아서 실제 프레임버퍼 값과 블렌딩)
+│   ├── console.c/h
+│   │                    M23: Replaced with an integer-only
+│   │                    bilinear-interpolation anti-aliased glyph renderer.
+│   │                    Added the public console_blend_pixel() API
+│   │                    (blends a color into the actual framebuffer value
+│   │                    using coordinates + coverage (0–256)).
+│
 ├── kernel/gui/
-│   ├── wm.c            M23: 배경화면의 태양/달 원 가장자리에도 (isqrt 기반) 서브픽셀
-│   │                    안티에일리어싱 적용 — 계단현상 제거
+│   ├── wm.c
+│   │                    M23: Applied isqrt-based subpixel anti-aliasing
+│   │                    to the edges of the sun/moon circles in the
+│   │                    wallpaper, removing visible stair-stepping.
+│
 ├── kernel/fs/
-│   ├── jetfs.h          M23: jetfs_inode_t.size를 uint32_t→uint64_t로 확장,
-│   │                    triple_indirect 필드 추가, JETFS_MAX_FILE_BLOCKS를
-│   │                    삼중 간접까지 포함해 재계산(~4.0GB → ~4.0TB)
-│   ├── jetfs.c          M23: file_block_map/free/free_all_blocks에 삼중간접 처리 추가,
-│   │                    write/append 공통 로직을 file_write_from()으로 통합,
-│   │                    새 함수 jetfs_append() 추가(대용량 파일을 청크 단위로 이어쓰기)
-├── include/jetapi/jetapi.h, kernel/jetapi/jetapi.c   M23: ReadFileJ/WriteFileJ/
-│   │                    JetFileListCallback을 uint64_t 크기로 확장(jetfs API 변경 전파)
-├── kernel/apps/jash.c, file_manager.c, kernel/shell/terminal.c,
-│   kernel/gui/desktop.c, kernel/exec/pe_loader.c, elf_loader.c,
-│   kernel/compat/win32.c   M23: jetfs/jetapi 크기 매개변수 확장에 맞춰 호출부 전부 갱신
-│                    (uint32_t*를 uint64_t API에 넘기던 포인터 타입 불일치 경고 전부 수정 —
-│                    고치지 않았으면 스택 메모리 손상으로 이어졌을 것)
+│   ├── jetfs.h
+│   │                    M23: Expanded jetfs_inode_t.size from uint32_t
+│   │                    to uint64_t. Added the triple_indirect field.
+│   │                    Recalculated JETFS_MAX_FILE_BLOCKS to include
+│   │                    triple-indirect blocks (~4.0GB → ~4.0TB).
+│   │
+│   ├── jetfs.c
+│   │                    M23: Added triple-indirect handling to
+│   │                    file_block_map/free/free_all_blocks.
+│   │                    Unified write/append logic through file_write_from().
+│   │                    Added the new jetfs_append() API for appending
+│   │                    large files in chunks.
+│
+├── include/jetapi/jetapi.h
+├── kernel/jetapi/jetapi.c
+│   │                    M23: Expanded ReadFileJ/WriteFileJ/
+│   │                    JetFileListCallback size parameters to uint64_t
+│   │                    to propagate the JETFS API changes.
+│
+├── kernel/apps/jash.c
+├── kernel/apps/file_manager.c
+├── kernel/shell/terminal.c
+├── kernel/gui/desktop.c
+├── kernel/exec/pe_loader.c
+├── kernel/exec/elf_loader.c
+├── kernel/compat/win32.c
+│                        M23: Updated all call sites to match the expanded
+│                        jetfs/jetapi size parameters.
+│                        This also fixed pointer type mismatches where
+│                        uint32_t* values were passed to uint64_t APIs.
+│                        Such mismatches can compile with only a warning
+│                        in C and can otherwise lead to stack memory
+│                        corruption.
 ```
-(그 외 디렉터리는 M22와 동일 — 이전 문서 참고)
+
+(All other directories remain the same as M22. See the previous documentation.)
 
 ---
 
-## 마일스톤별 요약 (M23만 추가)
+## Milestone Summary
 
-| # | 제목 | 핵심 내용 |
-|---|------|-----------|
-| 23 | 안티에일리어싱 + JETFS 20GB | ①정수 전용 바이리니어 보간으로 폰트 렌더링을 매끄럽게(픽셀아트 느낌 대폭 감소), 배경화면 태양 원 가장자리도 서브픽셀 안티에일리어싱 ②JETFS에 삼중 간접 블록 추가(ext2/Linux 개념만 참고, 코드는 새로 작성)로 파일 크기 상한을 4GB→4TB급으로 확장, inode.size를 64비트로 확장, jetfs_append() 신설 ③(버그 수정) 안티에일리어싱 커버리지 계산 시프트 오류로 텍스트가 전부 안 보이던 문제, jetfs/jetapi 크기 매개변수를 64비트로 넓히며 놓칠 뻔한 포인터 타입 불일치들 |
-
----
-
-## 현재 동작하는 전체 기능 목록 (M22 목록 + M23 변경분)
-
-### M1~22 전체 기능
-(M22 문서와 동일 — 전부 유지, Milestone 23 종료 시점에 재확인: 모든 부팅 자체 테스트 통과,
-데스크톱 GUI까지 정상 도달, 스크린샷으로 시각적 확인 완료 — 회귀 없음.)
-
-### Milestone 23 신규
-- **안티에일리어싱 폰트 렌더링**: 5x7 비트맵 폰트를 정수 전용 바이리니어 보간으로
-  확대해서 대각선/곡선이 예전(최근접 이웃 확대, 계단현상)보다 훨씬 매끄럽다. 배경도
-  그라디언트든 뭐든 실제 프레임버퍼 값을 읽어와 블렌딩하므로 어디에 그려도 자연스럽다.
-- **원형 도형 안티에일리어싱**: 배경화면의 태양/달 원 가장자리도 정수 제곱근(isqrt)
-  기반 서브픽셀 블렌딩으로 계단현상 없이 그려진다.
-- **JETFS 삼중 간접 블록**: 파일 최대 크기 상한을 (구조적으로) 약 4GB → 약 4TB로 확장.
-  요청받은 "파일당 최대 20GB"를 넉넉히 만족. 다만 실제로 20GB 파일을 담으려면 디스크
-  이미지 자체가 그만큼 커야 한다(빌드 방법 참고).
-- **jetfs_append()**: 파일 끝에 이어쓰는 새 API. 이 커널은 RAM이 제한적이라(테스트
-  환경 기준 256MB) 20GB 파일을 한 번의 `jetfs_write()` 호출로 통째로 쓰는 건 애초에
-  불가능한데, 이 함수로 청크 단위로 반복 호출해 큰 파일을 실제로 만들 수 있다.
+| #  | Title                      | Core Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23 | Anti-Aliasing + JETFS 20GB | ① Integer-only bilinear interpolation for smoother font rendering, greatly reducing the pixel-art appearance; subpixel anti-aliasing for the sun/moon edges in the wallpaper. ② Added triple-indirect blocks to JETFS (conceptually inspired by ext2/Linux, with the code written from scratch), expanding the structural file-size limit from ~4GB to ~4TB, comfortably exceeding the requested 20GB target. Expanded `inode.size` to 64-bit and added `jetfs_append()`. ③ Fixed an anti-aliasing coverage calculation shift bug and corrected pointer type mismatches caused by expanding jetfs/jetapi size parameters to 64-bit. |
 
 ---
 
-## 실제로 발견하고 고친 버그 (M23)
+## Complete Current Feature Set
 
-16. **안티에일리어싱 커버리지 계산의 시프트 오류로 모든 텍스트가 사라짐** (M23): 바이리니어
-    보간 커버리지를 0~256 범위로 정규화하는 코드에서 `total >> 16`을 썼는데, `total`의
-    실제 최대값이 65536(=2^16)이라 `total >> 8`이 맞았다 — 8비트를 더 밀어버려서 모든
-    글자의 커버리지가 항상 0이 되어(즉 완전히 투명해져) 화면에서 텍스트가 통째로
-    사라졌다. 첫 QEMU 스크린샷에서 아이콘은 보이는데 라벨 텍스트가 전부 없는 걸 보고
-    발견 — 호스트에서 'A' 글자 하나의 커버리지 맵을 직접 출력해보는 작은 테스트
-    프로그램으로 원인을 확정하고 수정했다(수정 후 같은 테스트에서 정상적인 그라디언트
-    커버리지 맵 확인).
-17. **정적 대용량 테스트 버퍼로 인한 부트로더 충돌 재발 방지 확인** (M22에서 이미 겪은
-    문제 — M23의 브레인스토밍 단계에서 20GB 시나리오를 어떻게 검증할지 고민하다가,
-    "실제 20GB를 QEMU 부팅 자체 테스트로 직접 쓰면" M22의 15번 버그(커널 이미지에 큰
-    정적 버퍼를 넣었다가 부트로더의 고정주소 로딩과 충돌)와 똑같은 함정에 빠지거나,
-    설령 kmalloc을 쓰더라도 이 커널의 RAM 한도(테스트 환경 기준 256MB)로는 애초에
-    20GB를 담을 버퍼 자체를 만들 수 없다는 걸 미리 인지했다 — 그래서 부팅 자체 테스트로
-    "20GB 실증"을 시도하는 대신 호스트 하네스 방식을 택했다(정직한 스코프 판단이라 버그
-    히스토리에 함께 기록해둔다).
-18. **`mkjetfs`가 스파스가 아니라 디스크 전체를 실제로 0으로 채워쓴다는 걸 실제로 겪음**
-    (M23): 호스트 하네스 테스트용으로 4.3GB짜리 테스트 이미지를 실제 배포용 `mkjetfs.c`
-    그대로 만들었더니, 이 샌드박스에 남아있던 여유 디스크(3.6GB)보다 큰 용량을 실제로
-    다 써버려서 디스크가 거의 꽉 찼다(fwrite로 전체 데이터 영역을 0으로 채우는 방식이라
-    스파스 파일이 안 됨). 즉시 이미지를 지워 공간을 회수하고, `ftruncate`만으로 크기를
-    잡고 슈퍼블록/inode테이블/비트맵처럼 실제로 0이 아닌 값이 필요한 작은 영역만 명시적
-    으로 쓰는 별도의 스파스 전용 호스트 테스트 도구를 새로 만들어 해결했다. **참고**:
-    이 스파스 방식은 순수 테스트 도구에서만 쓰고, 실제 배포되는 `tools/mkjetfs.c`는
-    안전을 위해 여전히 전체를 0으로 채워쓰는 방식을 유지한다(사용자가 실제 디스크에
-    20GB 이미지를 만든다면 그만큼의 진짜 디스크 공간이 확보되어 있어야 한다는 뜻이므로,
-    이 문서 위쪽에 명시해뒀다).
+### M1–22
+
+All features from the M22 documentation remain available.
+
+At the end of Milestone 23, they were re-verified:
+
+* All boot self-tests pass.
+* The system successfully reaches the desktop GUI.
+* Visual output was verified using screenshots.
+* No regressions were observed.
+
+### New in Milestone 23
+
+* **Anti-aliased font rendering:**
+  The 5×7 bitmap font is enlarged using integer-only bilinear interpolation, producing significantly smoother diagonal and curved shapes than the previous nearest-neighbor scaling. Because the background framebuffer value is read before blending, the result works naturally regardless of what is behind the text, including gradients.
+
+* **Anti-aliased circular shapes:**
+  The sun/moon circles in the wallpaper use integer square-root (`isqrt`) based subpixel blending, eliminating visible stair-stepping along their edges.
+
+* **JETFS triple-indirect blocks:**
+  The structural maximum file size has been expanded from approximately 4GB to approximately 4TB. This comfortably supports the requested 20GB-per-file target. However, actually storing a 20GB file still requires a disk image large enough to contain it.
+
+* **`jetfs_append()`:**
+  A new API for appending data to the end of a file. Since the kernel has limited RAM (256MB in the test environment), attempting to write a 20GB file through a single `jetfs_write()` call is inherently impractical. `jetfs_append()` allows large files to be created incrementally using chunks.
 
 ---
 
-## 알려진 한계 / 미완성 (M23 시점)
+## Bugs Actually Found and Fixed in M23
 
-M22 문서의 한계 목록은 전부 유효하다. M23에서 새로 추가/갱신된 한계:
+### 16. Anti-Aliasing Coverage Shift Bug Caused All Text to Disappear
 
-| 항목 | 현황 |
-|------|------|
-| 안티에일리어싱 대상 | 폰트 렌더링과 배경화면 태양/달 원에는 적용됐지만, 데스크톱 아이콘
-|  | (폴더/터미널/다이아몬드 등, 단순 사각/선 도형이라 원래도 덜 각져 보임)과 작업표시줄의
-|  | 별/구름/스피커/신호막대 아이콘에는 아직 적용 안 함 |
-| 20GB 파일 실사용 | 구조적으로는 지원하지만, 실제로 20GB 파일을 만들려면 디스크
-|  | 이미지 자체가 20GB 이상이어야 하고, 그 이미지를 `mkjetfs`로 포맷하는 데만도
-|  | 실제로 20GB의 디스크 쓰기가 필요하다(스파스 아님) — 시간도 꽤 걸릴 수 있음 |
-| 삼중 간접 축소(shrink) | `jetfs_write`로 파일을 다시 작게 쓸 때, 이중간접 트리
-|  | 회수는 되지만 삼중간접 트리 전체가 필요 없어질 만큼 극단적으로 줄이는 경우
-|  | (4GB+ → 몇 바이트)는 그 트리의 "껍데기"가 즉시 회수되지 않는다(다음에 그
-|  | 파일을 완전히 지우면 file_free_all_blocks가 결국 회수 — 알려진 단순화) |
-| jetfs_append 성능 | 매 호출마다 파일을 다시 열고(inode 재조회) 마지막 블록까지
-|  | 다시 순회하는 구조라, 아주 작은 청크로 수십만 번 append하면 비효율적일 수
-|  | 있다(청크를 크게(예: 수십~수백MB) 잡아서 호출 횟수를 줄이는 걸 권장) |
+The bilinear interpolation coverage was normalized to the 0–256 range using:
 
----
+```c
+total >> 16
+```
 
-## 다음에 해야 할 작업 (우선순위 순 제안, M22 문서 이어서 갱신)
+However, the actual maximum value of `total` was **65536 (= 2^16)**, meaning the correct operation was:
 
-1. **인증서 검증(신뢰 체인 + 호스트명)** — 여전히 최우선 보안 과제.
-2. **나머지 아이콘에도 안티에일리어싱 적용** — 작업표시줄 별/구름/스피커/신호막대.
-3. **FAT32 쓰기 지원**.
-4. **ECDHE 지원**.
-5. **AC97/HDA 디지털 오디오**.
-6. **프로세스 종료 시 자원 회수**.
-7. **재사용 가능한 위젯 툴킷 전면 적용**.
-8. **20GB 시나리오 실기 검증** — 실제 20GB 이상 여유 디스크가 있는 환경에서 `mkjetfs`로
-   진짜 20GB 이미지를 만들어 QEMU에서 부팅 후 usbimport/httprun 등으로 대용량 파일을
-   실제로 다뤄보는 end-to-end 검증(이번엔 샌드박스 디스크/시간 제약으로 호스트 하네스에
-   그쳤음).
+```c
+total >> 8
+```
+
+The extra 8-bit shift caused every glyph's coverage to become zero. As a result, all text became completely transparent and disappeared from the screen.
+
+The issue was discovered after the first QEMU screenshot showed that icons were visible but all their label text was missing.
+
+A small host-side test program was then used to print the coverage map of a single `'A'` glyph. This confirmed the cause. After the fix, the same test produced a normal gradient coverage map.
 
 ---
 
-## 참고: 코드 스타일/설계 원칙 (일관성 유지용)
+### 17. Prevented a Recurrence of the Static Large-Test-Buffer Bootloader Collision
 
-M22까지의 원칙(어셈블리 3파일, 부팅 자체 테스트, 호스트 하네스 테스트, 헤더 변경 시 전체
-재빌드 확인, 시각적 변경은 스크린샷으로 확인, 큰 정적 버퍼 금지 — kmalloc 사용, use-after-
-free 주의, 단순화 문서화)이 전부 유효하다. M23에서 추가:
+This was originally encountered in M22.
 
-- **다른 프로젝트(ReactOS/Linux 등) 참고 시 "개념만" 가져올 것**: 이번 삼중 간접 블록처럼
-  잘 알려진 설계 아이디어를 참고할 땐, 그 아이디어가 "왜" 그렇게 생겼는지 이해하고 이
-  프로젝트의 기존 코드 스타일(변수명, 주석, 에러 처리 패턴)에 맞춰 처음부터 새로 쓴다 —
-  코드를 그대로 옮기거나 구조를 그대로 베끼지 않는다.
-- **API의 크기/개수 매개변수 타입을 넓힐 땐 모든 호출부를 그레rep으로 찾아 포인터 타입까지
-  맞출 것**: C는 `uint32_t*`를 `uint64_t*` 자리에 넘겨도 컴파일 에러가 아니라 경고만
-  내고 통과시킨다(`-Wincompatible-pointer-types`) — 방치하면 스택 메모리 손상으로
-  이어지는 조용한 버그가 된다. 빌드 후 반드시 `grep -i warning`으로 전체 경고를 확인할 것.
-- **대용량 데이터 시나리오는 호스트 스파스파일 하네스로 검증**: 실제 프로덕션 코드
-  (`jetfs.c` 등)를 그대로 호스트 gcc로 컴파일하고 I/O 함수만 스텁으로 바꿔치기하되,
-  백업 저장소는 `ftruncate` 기반 스파스 파일을 써서 샌드박스의 제한된 디스크 용량
-  안에서도 GB~TB급 시나리오를 안전하게 실험할 것.
+While planning how to validate the 20GB scenario in M23, it became clear that attempting to write a real 20GB dataset directly during the QEMU boot self-test could recreate the same problem as M22 bug #15: a large static buffer inside the kernel image could collide with the bootloader's fixed-address loading area.
+
+Even using `kmalloc()` would not solve the fundamental problem, because the kernel's available RAM in the test environment is only approximately 256MB. A 20GB in-memory buffer is obviously impossible.
+
+Therefore, instead of attempting to "prove" 20GB support through the boot self-test itself, the project adopted the host sparse-file harness approach.
+
+This was a deliberate and documented scope decision rather than an attempt to hide the limitation.
+
+---
+
+### 18. Discovered That `mkjetfs` Uses Real Zero-Filling Instead of Sparse Allocation
+
+While preparing a 4.3GB test image using the actual distributed `mkjetfs.c`, it was discovered that the tool writes zeros across the entire data area.
+
+This consumed nearly all available disk space in the sandbox. At the time, only approximately 3.6GB of free space remained.
+
+The oversized test image was immediately removed to recover the disk space.
+
+A separate sparse-only host testing tool was then created. It uses `ftruncate()` to establish the disk size and explicitly writes only the small regions that actually need non-zero data, such as:
+
+* the superblock
+* inode tables
+* bitmaps
+
+The sparse approach is used **only by the test tool**.
+
+The actual distributed `tools/mkjetfs.c` intentionally continues to zero-fill the entire disk image for safety and predictability. This means that anyone creating a real 20GB JETFS image must have approximately 20GB of actual free disk space available.
+
+---
+
+## Known Limitations / Incomplete Areas
+
+All limitations listed in the M22 documentation remain valid.
+
+The following limitations were added or updated in M23:
+
+| Item                         | Status                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Anti-aliasing coverage       | Anti-aliasing is currently applied to font rendering and the sun/moon circles in the wallpaper. Desktop icons (folders, terminal, diamonds, etc.) and taskbar icons (stars, clouds, speakers, signal bars) do not yet use anti-aliasing. These are mostly simple geometric shapes and therefore appear less jagged even without it.                                                                          |
+| 20GB file real-world usage   | Structurally supported, but actually creating a 20GB file requires a disk image of at least that size. The distributed `mkjetfs` is not sparse and therefore requires real disk writes for the entire image. This may take considerable time.                                                                                                                                                                |
+| Triple-indirect shrink       | When a file is rewritten to a smaller size, double-indirect structures are reclaimed where applicable. However, in an extreme shrink operation (for example, 4GB+ → a few bytes), the entire now-unnecessary triple-indirect tree is not immediately reclaimed. The remaining tree is eventually reclaimed when the file itself is deleted through `file_free_all_blocks()`. This is a known simplification. |
+| `jetfs_append()` performance | Each call currently reopens the file, looks up the inode again, and walks the final blocks again. Hundreds of thousands of very small append operations could therefore be inefficient. Larger chunks (for example, tens to hundreds of MB) are recommended to reduce the number of calls.                                                                                                                   |
+
+---
+
+## Next Tasks
+
+In priority order, continuing from the M22 roadmap:
+
+1. **Certificate verification (trust chain + hostname verification)** — still the highest-priority security task.
+2. **Apply anti-aliasing to the remaining icons** — taskbar stars/clouds/speaker/signal bars.
+3. **FAT32 write support.**
+4. **ECDHE support.**
+5. **AC97/HDA digital audio.**
+6. **Resource reclamation when processes terminate.**
+7. **Apply the reusable widget toolkit throughout the GUI.**
+8. **Real-world 20GB scenario verification** — on a system with more than 20GB of available disk space, create a genuine 20GB JETFS image using `mkjetfs`, boot it in QEMU, and use `usbimport`/`httprun` and related functionality to handle large files end-to-end.
+
+---
+
+## Code Style / Design Principles
+
+All principles from M22 remain valid:
+
+* Three assembly files.
+* Boot self-testing.
+* Host harness testing.
+* Full rebuild after header/API changes.
+* Screenshot verification for visual changes.
+* Avoid large static buffers.
+* Use `kmalloc()` for dynamically sized buffers.
+* Be careful about use-after-free.
+* Document intentional simplifications.
+
+M23 adds the following principles:
+
+### 1. When referencing other projects, use concepts — not code
+
+When studying well-known designs from projects such as ReactOS or Linux, only adopt the underlying concepts.
+
+For example, when implementing the triple-indirect block system, understand **why** the design works and then implement it from scratch using this project's existing coding style, variable naming, comments, and error-handling conventions.
+
+Do not copy or directly port source code or reproduce another project's internal structure.
+
+### 2. When widening API size/count parameters, update every call site — including pointer types
+
+When changing an API from `uint32_t` to `uint64_t`, search the entire codebase for all callers and make sure the pointer types are updated as well.
+
+In C, passing a `uint32_t*` where a `uint64_t*` is expected may result in a compiler warning rather than an error. If left unfixed, this can cause silent memory corruption, including stack corruption.
+
+After the change:
+
+```bash
+grep -i warning
+```
+
+should be used to verify that no relevant warnings remain.
+
+### 3. Validate large-data scenarios using host sparse-file harnesses
+
+For large-data scenarios, compile the actual production code (such as `jetfs.c`) directly with host GCC and replace only the low-level I/O functions with test stubs.
+
+Use a sparse backing file created with `ftruncate()` so that GB- to TB-scale scenarios can be tested without consuming the entire available disk space.
+
+This keeps the tested filesystem logic identical to the production kernel implementation while making large-scale testing practical in constrained development environments.
