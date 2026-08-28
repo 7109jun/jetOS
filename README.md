@@ -25,3 +25,7 @@ Understanding JetOS is easier than you think. Check out our guides:
 
 ## ver2 Logo
 <img width="1664" height="928" alt="image" src="https://github.com/user-attachments/assets/3fd66e79-0b7c-444f-b21d-a6ef66015843" />
+
+
+## V3r3 Logo
+<img width="1672" height="941" alt="예히우 드디어 만들었땅" src="https://github.com/user-attachments/assets/1c9d59cf-f03e-49df-8a6e-00b043172538" />
