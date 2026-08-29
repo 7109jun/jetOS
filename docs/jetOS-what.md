@@ -146,7 +146,7 @@ JetOS considers **the fact that we made it ourselves and that we can understand 
 
 The source code of JetOS can be used according to the conditions of the license specified by the project.
 
-### It is the GNU Affero General Public License v3.0.
+### It is the MIT
 
 ---
 
