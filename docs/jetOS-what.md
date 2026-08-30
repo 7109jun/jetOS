@@ -146,7 +146,7 @@ JetOS considers **the fact that we made it ourselves and that we can understand 
 
 The source code of JetOS can be used according to the conditions of the license specified by the project.
 
-### It is the MIT
+### It is the ```lincense.md``` flie 
 
 ---
 
