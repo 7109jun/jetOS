@@ -1,6 +1,7 @@
 # jetOS!
 
 <img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/5cb9cd22-55af-424d-a186-7b466486e41b" />
+
 >Mlistone 23 image
 
 
