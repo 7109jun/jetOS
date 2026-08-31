@@ -619,4 +619,4 @@ The F language compiler is written as a single C file and generates executables 
 - **Output Format:** On Windows, it directly assembles a PE32+ `.exe` file; on Linux, it directly assembles an ELF executable.
 
 Through this guide, you should be able to sufficiently understand and use the core features of the F language. Additional feature extensions and syntax improvements will be implemented alongside updates to the compiler source code.
-# F will be added later In the OS..
+# F will be added later In the OS.. It could be otherwise, but I’m just too lazy  💀
