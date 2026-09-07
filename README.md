@@ -16,7 +16,7 @@ Welcome to jetOS.
 And it’s an independent kernel! 
 I made this I’ve hardly ever tried hardware booting even once.. I recommend booting only from QEMU..
 ### License
-The license is the Apache License! It must be a really good license, right?
+GPL v3.0
 
 ### Files worth viewing first
 [A document that shows why it was developed](https://github.com/7109jun/jetOS/blob/main/docs/I%20Made%20It%20Because%20I%20Was%20Bored.md)
