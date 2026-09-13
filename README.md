@@ -23,3 +23,6 @@ GPL v3.0
 [It’s not really a stat folder file, but there’s a lot of important information here](https://github.com/7109jun/jetOS/tree/main/Status)
 ### Logo!
 <img width="1672" height="941" alt="예히우 드디어 만들었땅" src="https://github.com/user-attachments/assets/1c9d59cf-f03e-49df-8a6e-00b043172538" />
+
+
+## jetOS has now been terminated.
