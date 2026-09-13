@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>JetOS - Download</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #eef3f8;
+            color: #1d2733;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .hero-content {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .logo {
+            font-size: clamp(64px, 12vw, 150px);
+            font-weight: 700;
+            letter-spacing: -6px;
+            color: #1769aa;
+            margin: 0;
+        }
+
+        .description {
+            margin-top: 20px;
+            font-size: clamp(18px, 3vw, 28px);
+            color: #607080;
+        }
+
+        .download-button {
+            display: inline-block;
+            margin-top: 55px;
+            padding: 20px 55px;
+            border-radius: 8px;
+            background: #1769aa;
+            color: white;
+            text-decoration: none;
+            font-size: 21px;
+            font-weight: 600;
+            border: 1px solid #12588f;
+            box-shadow: 0 5px 15px rgba(23, 105, 170, 0.25);
+            transition: 0.15s;
+        }
+
+        .download-button:hover {
+            background: #12588f;
+            transform: translateY(-2px);
+        }
+
+        .download-button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            min-height: 70vh;
+            padding: 100px 24px;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-content {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .info h2 {
+            font-size: 40px;
+            margin: 0 0 25px;
+            color: #1769aa;
+        }
+
+        .info p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #607080;
+        }
+
+        .developer {
+            margin-top: 50px;
+            font-size: 17px;
+            color: #4b5a68;
+        }
+
+        .developer strong {
+            color: #1769aa;
+        }
+
+        footer {
+            padding: 70px 24px;
+            text-align: center;
+            background: #e3eaf1;
+        }
+
+        .github {
+            display: inline-block;
+            color: #1769aa;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .github:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #71808e;
+        }
+
+        @media (max-width: 600px) {
+            .download-button {
+                width: 100%;
+                padding: 18px 20px;
+            }
+
+            .info h2 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="logo">JetOS</h1>
+
+            <p class="description">
+                JetOS Download
+            </p>
+
+            <!-- GitHub Raw 파일을 직접 다운로드 -->
+            <a
+                class="download-button"
+                href="https://raw.githubusercontent.com/7109jun/jetOS/main/Code/46~55/JetOS_Milestone53.tar.gz"
+                download="JetOS_Milestone53.tar.gz"
+            >
+                Source code Download
+            </a>
+        </div>
+    </section>
+
+    <section class="info">
+        <div class="info-content">
+            <h2>JetOS</h2>
+
+            <p>
+                You can download the source code of JetOS.
+                <br>
+                You can check the latest project information and development details in the GitHub repository.
+            </p>
+
+            <div class="developer">
+                Dev: <strong>7109jun</strong>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <a
+            class="github"
+            href="https://github.com/7109jun/jetOS"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            GitHub Repository
+        </a>
+
+        <div class="copyright">
+            JetOS · 7109jun
+        </div>
+    </footer>
+
+</body>
+</html>
